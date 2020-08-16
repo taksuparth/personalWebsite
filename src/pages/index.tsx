@@ -1,6 +1,57 @@
+//lib
+import React, {useEffect, useState} from 'react';
+
 import Head from 'next/head'
+import { GetStaticProps } from 'next';
+
+import fetch from 'isomorphic-unfetch';
+
+export const getStaticProps: GetStaticProps = async (context) => {
+    return ({
+      props: {},
+    })
+}
 
 export default function Home() {
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState([]);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(`http://localhost:3000/api/vehicle`);
+        const data = await res.json();
+        setData(data);
+        setError('');
+      } catch(error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+
+  const renderAdditional = () => {
+    if(loading) {
+      return <h2>Loading.....</h2>
+    }
+
+    if(error !== '') {
+      return <h2>Error ocured....</h2>
+    }
+
+    return (
+      <ul>{
+        data.map(datum => (
+        <li key="datum.id">{datum.name}</li>
+        ))
+      }</ul>
+    )
+  };
+
   return (
     <div className="container">
       <Head>
@@ -11,8 +62,8 @@ export default function Home() {
       <main>
         <h1 className="title">
           Welcome to <a href="https://nextjs.org">Parth's!</a>
-        </h1>
-
+        </h1> 
+        {renderAdditional()}
         <p className="description">
           Get started by editing <code>pages/index.js</code>
         </p>
